@@ -1,21 +1,22 @@
-#!/bin/bash
+#!/bin/ash
 
 set -Eeuo pipefail
 
-echo "*** Add route for Local Network"
-GATEWAY=$(/bin/ip route | grep default | awk '{print $3}')
-INTERFACE=$(/bin/ip route | grep default | awk '{print $5}')
-/bin/ip route add to 192.168.1.0/24 via $GATEWAY dev $INTERFACE
+function shutdown()
+{
+    stop-server
+}
 
-echo "*** Start OpenVPN"
-/usr/sbin/openvpn --config /root/.openvpn/Sweden.ovpn --log-append /root/.openvpn/logs/openvpn.log --daemon
+pythonArg=$1
+shift
 
-echo "*** Waiting OpenVPN connected"
-sleep 15
+#python3 download-minecraft.py $pythonArg
 
-echo "*** Start Deluged"
-/usr/bin/python3 /usr/bin/deluged -c /config --logfile=/config/deluged.log --loglevel=info
+#echo "Install result: $?"
 
-echo "*** Done"
+cd /mcserver
+exec java -Xms1G -Xmx1G -jar server.jar nogui
+
+trap shutdown 1 2 3 6 9 14 15 20
 
 exec "$@"
