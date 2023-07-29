@@ -1,0 +1,84 @@
+{
+    "mandatory": [
+        {
+            "name": "Fabric API",
+            "id": "P7dR8mSH",
+            "source": "modrinth",
+            "enable": true
+        },
+        {
+            "name": "Lithium",
+            "id": "gvQqBUqZ",
+            "source": "modrinth",
+            "enable": true
+        },
+        {
+            "name": "Very Many Players",
+            "id": "wnEe9KBa",
+            "source": "modrinth",
+            "enable": true
+        },
+        {
+            "name": "Concurrent Chunk Management Engine",
+            "id": "VSNURh3q",
+            "source": "modrinth",
+            "enable": true
+        },
+        {
+            "name": "FerriteCore",
+            "id": "uXXizFIs",
+            "source": "modrinth",
+            "enable": true
+        },
+        {
+            "name": "Krypton",
+            "id": "fQEb0iXm",
+            "source": "modrinth",
+            "enable": true
+        },
+        {
+            "name": "Memory Leak Fix",
+            "id": "NRjRiSSD",
+            "source": "modrinth",
+            "enable": true
+        },
+        {
+            "name": "Server Performance - Smooth Chunk Save",
+            "id": "582327",
+            "source": "curseforge",
+            "enable": true
+        },
+        {
+            "name": "Faster Random",
+            "id": "RfFxanNh",
+            "source": "modrinth",
+            "enable": false
+        },
+        {
+            "name": "Async Locator",
+            "id": "rkN8aqci",
+            "source": "modrinth",
+            "enable": true
+        },
+        {
+            "name": "Carpet",
+            "id": "TQTTVgYE",
+            "source": "modrinth",
+            "enable": true
+        },
+        {
+            "name": "Carpet Extra",
+            "id": "VX3TgwQh",
+            "source": "modrinth",
+            "enable": true
+        }
+    ],
+    "optional": [
+        {
+            "name": "Chunky",
+            "id": "fALzjamp",
+            "source": "modrinth",
+            "enable": true
+        }
+    ]
+}
