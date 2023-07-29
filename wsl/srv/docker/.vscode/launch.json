@@ -9,9 +9,13 @@
             "type": "python",
             "request": "launch",
             "program": "${file}",
+            "args": [
+                "--install"
+            ],
             "console": "integratedTerminal",
             "justMyCode": true,
             "envFile": "${workspaceFolder}/.env"
+            //"preLaunchTask": "clean"
         }
     ]
 }
