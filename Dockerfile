@@ -17,14 +17,14 @@ RUN \
     apk add python3 ; ln -sf python3 /usr/bin/python ; \
     echo "*** Python 3 Module" ; \
     apk add py3-pip ; pip3 install tqdm requests ; \
+    echo "*** Add RCON" ; \
+    apk add rcon ; \
     echo "*** Clean APK ***" ; \
     apk cache clean ; \
     echo "**** Create directory ***" ; \
     mkdir /mcserver
 
-EXPOSE 25565
+EXPOSE 25565 25575
 VOLUME /mcserver
 
-ENTRYPOINT ["/entrypoint/docker-entrypoint.sh"]
-
-CMD ["sh"]
+CMD ["/entrypoint/docker-entrypoint.sh", "--install"]
