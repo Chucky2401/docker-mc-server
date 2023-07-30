@@ -32,6 +32,8 @@
     },
     "terminal.integrated.defaultProfile.linux": "bash-env",
     "python.analysis.diagnosticSeverityOverrides": {
-        "reportInvalidStringEscapeSequence": "none"
-    }
+        "reportInvalidStringEscapeSequence": "none",
+        "reportOptionalMemberAccess": "none"
+    },
+    "terminal.integrated.env.linux": {}
 }
