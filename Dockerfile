@@ -4,11 +4,17 @@ LABEL Author="Chucky2401"
 LABEL Description="Minecraft Server"
 LABEL Version="0.1"
 
-#ADD src/* /root/
-#COPY docker-entrypoint.sh /usr/local/bin/
+RUN \
+    mkdir /mcserver ; \
+    mkdir -m 755 /usr/local/bin/mcserver ; \
+    mkdir /entrypoint
+
+COPY --chmod=755 entrypoint/docker-entrypoint.sh /entrypoint/docker-entrypoint.sh
+COPY --chmod=755 entrypoint/download-minecraft.py /entrypoint/download-minecraft.py
+COPY --chmod=444 entrypoint/mods.json /entrypoint/mods.json
+COPY files/profile /etc/profile
 
 RUN \
-    cd / ; \
     echo "*** Update APK ***" ; \
     apk update ; apk upgrade -y ; \
     echo "*** Install OpenJDK ***" ; \
@@ -20,11 +26,16 @@ RUN \
     echo "*** Add RCON" ; \
     apk add rcon ; \
     echo "*** Clean APK ***" ; \
-    apk cache clean ; \
-    echo "**** Create directory ***" ; \
-    mkdir /mcserver
+    apk cache clean
 
 EXPOSE 25565 25575
 VOLUME /mcserver
 
-CMD ["/entrypoint/docker-entrypoint.sh", "--install"]
+ENV MC_LOADER=vanilla
+ENV MC_VERSION=latest
+ENV MC_MIN_MEM=1G
+ENV MC_MAX_MEM=1G
+
+ENTRYPOINT [ "sh", "/entrypoint/docker-entrypoint.sh" ]
+
+CMD [ "--install" ]
