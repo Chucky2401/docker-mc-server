@@ -1,4 +1,4 @@
-import os, argparse, sys
+import os, argparse, sys, stat
 import urllib.request, json, requests
 import subprocess, re
 import secrets
@@ -145,54 +145,49 @@ def eula():
 def properties(password):
     keyView = "view-distance=[0-9]+"
     keySim  = "simulation-distance=[0-9]+"
-    keySync = "sync-chunk-writes=.+"
+    keySync = "sync-chunk-writes=(true|false)"
 
     repView = "view-distance=8"
     repSim  = "simulation-distance=4"
     repSync = "sync-chunk-writes=false"
 
     keyRconPort = "rcon.port=[0-9]+"
-    keyRconEnable = "enable-rcon=.+"
+    keyRconEnable = "enable-rcon=(true|false)"
     keyRconPassword = "rcon.password="
 
     repRconPort = "rcon.port=25575"
     repRconEnable = "enable-rcon=true"
     repRconPassword = "rcon.password=" + password
 
-    os.rename("/mcserver/server.properties", "/mcserver/server.properties_origin")
+    serverProperties = open("/mcserver/server.properties", "r+")
+    properties = serverProperties.read()
 
-    serverPropertiesInput = open("/mcserver/server.properties_origin", "r")
-    serverPropertiesOutput = open("/mcserver/server.properties", "w")
+    oldValue = re.search(keyView, properties).group(0)
+    print(" * Replace " + oldValue + " by " + repView)
+    properties = (re.sub(keyView, repView, properties))
 
-    for line in serverPropertiesInput:
-        if re.search(keyView, line):
-            print("* Replacing 'view-distance=x' by 'view-distance=8'...")
-            serverPropertiesOutput.write(re.sub(keyView, repView, line))
-            continue
+    oldValue = re.search(keySim, properties).group(0)
+    print(" * Replace " + oldValue + " by " + repSim)
+    properties = (re.sub(keySim, repSim, properties))
 
-        if re.search(keySim, line):
-            print("* Replacing 'simulation-distance=x' by 'simulation-distance=4'...")
-            serverPropertiesOutput.write(re.sub(keySim, repSim, line))
-            continue
+    oldValue = re.search(keySync, properties).group(0)
+    print(" * Replace " + oldValue + " by " + repSync)
+    properties = (re.sub(keySync, repSync, properties))
 
-        if re.search(keySync, line):
-            print("* Replacing 'sync-chunk-writes=true' by 'sync-chunk-writes=false'...")
-            serverPropertiesOutput.write(re.sub(keySync, repSync, line))
-            continue
+    oldValue = re.search(keyRconEnable, properties).group(0)
+    print(" * Replace " + oldValue + " by " + repRconEnable)
+    properties = (re.sub(keyRconEnable, repRconEnable, properties))
 
-        if re.search(keyRconEnable, line):
-            serverPropertiesOutput.write(re.sub(keyRconEnable, repRconEnable, line))
+    oldValue = re.search(keyRconPort, properties).group(0)
+    print(" * Replace " + oldValue + " by " + repRconPort)
+    properties = (re.sub(keyRconPort, repRconPort, properties))
 
-        if re.search(keyRconEnable, line):
-            serverPropertiesOutput.write(re.sub(keyRconPort, repRconPort, line))
+    oldValue = re.search(keyRconPassword, properties).group(0)
+    print(" * Replace " + oldValue + " by " + repRconPassword)
+    properties = (re.sub(keyRconPassword, repRconPassword, properties))
 
-        if re.search(keyRconEnable, line):
-            serverPropertiesOutput.write(re.sub(keyRconPassword, repRconPassword, line))
-
-        serverPropertiesOutput.write(line)
-
-    serverPropertiesInput.close()
-    serverPropertiesOutput.close()
+    serverProperties.write(properties)
+    serverProperties.close()
 
     return 0
 
@@ -200,21 +195,37 @@ def properties(password):
 
 def setRcon(password):
     rconStart = open("/usr/local/bin/start-rcon", "w")
-    rconStart.write("#!/bin/sh")
-    rconStart.write("rcon -H 127.0.0.1 -p 25575 -P \"" + password + "\" -m")
+    rconStart.write("#!/bin/sh\n")
+    rconStart.write("rcon -H 127.0.0.1 -p 25575 -P \"" + password + "\" -m\n")
     rconStart.close()
 
     rconSetOp = open("/usr/local/bin/set-op", "w")
-    rconSetOp.write("#!/bin/sh")
-    rconSetOp.write("rcon -H 127.0.0.1 -p 25575 -P \"" + password + "\" -m /op $1")
+    rconSetOp.write("#!/bin/sh\n")
+    rconSetOp.write("rcon -H 127.0.0.1 -p 25575 -P \"" + password + "\" -m /op $1\n")
     rconSetOp.close()
 
+    rconRemoveOp = open("/usr/local/bin/remove-op", "w")
+    rconRemoveOp.write("#!/bin/sh\n")
+    rconRemoveOp.write("rcon -H 127.0.0.1 -p 25575 -P \"" + password + "\" -m /deop $1\n")
+    rconRemoveOp.close()
+
     rconStopServer = open("/usr/local/bin/stop-server", "w")
-    rconStopServer.write("#!/bin/sh")
-    rconStopServer.write("rcon -H 127.0.0.1 -p 25575 -P \"" + password + "\" -m /stop")
+    rconStopServer.write("#!/bin/sh\n")
+    rconStopServer.write("rcon -H 127.0.0.1 -p 25575 -P \"" + password + "\" -m /stop\n")
     rconStopServer.close()
 
-# -------------------------------------------------------------------------------------------------------------------- #
+    # Define user right execute
+    st = os.stat('/usr/local/bin/start-rcon')
+    os.chmod('/usr/local/bin/start-rcon', st.st_mode | stat.S_IEXEC)
+
+    st = os.stat('/usr/local/bin/set-op')
+    os.chmod('/usr/local/bin/set-op', st.st_mode | stat.S_IEXEC)
+
+    st = os.stat('/usr/local/bin/remove-op')
+    os.chmod('/usr/local/bin/remove-op', st.st_mode | stat.S_IEXEC)
+
+    st = os.stat('/usr/local/bin/stop-server')
+    os.chmod('/usr/local/bin/stop-server', st.st_mode | stat.S_IEXEC)
 
 ## Function to download mods
 def downloadMods(optional = False):
@@ -420,8 +431,11 @@ def install():
     resultEula     = -1
     resultProp     = -1
 
+    #alphabet = string.ascii_letters + string.digits + string.punctuation
     alphabet = string.ascii_letters + string.digits
     password = ''.join(secrets.choice(alphabet) for i in range(20))
+
+    rconPassword = readSecret("RCON_PASSWORD", default=password)
 
     print("*********************************************************")
     print("*  __  __  _                                   __  _    *")
@@ -470,12 +484,12 @@ def install():
         print("EULA has been accepted! I hope you agree with it...")
         print("")
         print("Anyway! Updating server.properties to optimize performance!")
-        resultProp = properties(password)
+        resultProp = properties(rconPassword)
     else:
         return resultProp
     
     if resultProp == 0:
-        resultRcon = setRcon(password)
+        resultRcon = setRcon(rconPassword)
 
     print("")
     print("Server optimized!")
@@ -501,6 +515,9 @@ if __name__ == '__main__':
             installResult = install()
         else:
             installResult = 0
+
+    if os.environ['MC_LOADER'] != "fabric":
+        modsResult = 0
         
         if os.environ['MC_LOADER'] == 'fabric' and installResult == 0:
             try:
@@ -522,4 +539,4 @@ if __name__ == '__main__':
         if modsResult != 0:
             mainResult = modsResult
     
-    sys.exit(mainResult)
+    quit(mainResult)
