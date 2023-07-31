@@ -114,6 +114,8 @@ def firstRun():
 
     if result != "":
         return 104
+    
+    os.remove("/mcserver/logs/latest.log")
 
     return 0
 
@@ -194,38 +196,41 @@ def properties(password):
 # -------------------------------------------------------------------------------------------------------------------- #
 
 def setRcon(password):
-    rconStart = open("/usr/local/bin/start-rcon", "w")
+    rconStart = open("/usr/local/bin/mcserver/start-rcon", "w")
     rconStart.write("#!/bin/sh\n")
     rconStart.write("rcon -H 127.0.0.1 -p 25575 -P \"" + password + "\" -m\n")
     rconStart.close()
 
-    rconSetOp = open("/usr/local/bin/set-op", "w")
+    rconSetOp = open("/usr/local/bin/mcserver/set-op", "w")
     rconSetOp.write("#!/bin/sh\n")
     rconSetOp.write("rcon -H 127.0.0.1 -p 25575 -P \"" + password + "\" -m /op $1\n")
     rconSetOp.close()
 
-    rconRemoveOp = open("/usr/local/bin/remove-op", "w")
+    rconRemoveOp = open("/usr/local/bin/mcserver/remove-op", "w")
     rconRemoveOp.write("#!/bin/sh\n")
     rconRemoveOp.write("rcon -H 127.0.0.1 -p 25575 -P \"" + password + "\" -m /deop $1\n")
     rconRemoveOp.close()
 
-    rconStopServer = open("/usr/local/bin/stop-server", "w")
+    rconStopServer = open("/usr/local/bin/mcserver/stop-server", "w")
     rconStopServer.write("#!/bin/sh\n")
     rconStopServer.write("rcon -H 127.0.0.1 -p 25575 -P \"" + password + "\" -m /stop\n")
+    rconStopServer.write("rm -f server.pid\n")
     rconStopServer.close()
 
     # Define user right execute
-    st = os.stat('/usr/local/bin/start-rcon')
-    os.chmod('/usr/local/bin/start-rcon', st.st_mode | stat.S_IEXEC)
+    st = os.stat('/usr/local/bin/mcserver/start-rcon')
+    os.chmod('/usr/local/bin/mcserver/start-rcon', st.st_mode | stat.S_IEXEC)
 
-    st = os.stat('/usr/local/bin/set-op')
-    os.chmod('/usr/local/bin/set-op', st.st_mode | stat.S_IEXEC)
+    st = os.stat('/usr/local/bin/mcserver/set-op')
+    os.chmod('/usr/local/bin/mcserver/set-op', st.st_mode | stat.S_IEXEC)
 
-    st = os.stat('/usr/local/bin/remove-op')
-    os.chmod('/usr/local/bin/remove-op', st.st_mode | stat.S_IEXEC)
+    st = os.stat('/usr/local/bin/mcserver/remove-op')
+    os.chmod('/usr/local/bin/mcserver/remove-op', st.st_mode | stat.S_IEXEC)
 
-    st = os.stat('/usr/local/bin/stop-server')
-    os.chmod('/usr/local/bin/stop-server', st.st_mode | stat.S_IEXEC)
+    st = os.stat('/usr/local/bin/mcserver/stop-server')
+    os.chmod('/usr/local/bin/mcserver/stop-server', st.st_mode | stat.S_IEXEC)
+
+# -------------------------------------------------------------------------------------------------------------------- #
 
 ## Function to download mods
 def downloadMods(optional = False):
@@ -424,6 +429,13 @@ def readSecret(name, default=None, cast_to=str, autocast_name=True, getenv=True,
     
 # -------------------------------------------------------------------------------------------------------------------- #
 
+def listdir_nodefault(path):
+    for f in os.listdir(path):
+        if not f('start-server.py'):
+            yield f
+
+# -------------------------------------------------------------------------------------------------------------------- #
+
 ## Main
 def install():
     result         = -1
@@ -511,7 +523,7 @@ if __name__ == '__main__':
     modsResult    = -1
 
     if args.install:
-        if len(os.listdir('/mcserver')) == 0:
+        if len([f for f in os.listdir("/mcserver") if not f == "start-server.py"]) == 0:
             installResult = install()
         else:
             installResult = 0
