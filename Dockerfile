@@ -12,7 +12,7 @@ RUN \
 COPY --chmod=755 entrypoint/docker-entrypoint.sh /entrypoint/docker-entrypoint.sh
 COPY --chmod=755 entrypoint/download-minecraft.py /entrypoint/download-minecraft.py
 COPY --chmod=444 entrypoint/mods.json /entrypoint/mods.json
-COPY files/profile /etc/profile
+COPY --chmod=755 files/start-server.py /mcserver/start-server.py
 
 RUN \
     echo "*** Update APK ***" ; \
@@ -35,6 +35,10 @@ ENV MC_LOADER=vanilla
 ENV MC_VERSION=latest
 ENV MC_MIN_MEM=1G
 ENV MC_MAX_MEM=1G
+ENV PATH="${PATH}:/usr/local/bin/mcserver"
+
+HEALTHCHECK --interval=1m --timeout=5s --start-period=30s --retries=2 \
+    CMD ps ax | grep -v grep | grep $(cat /mcserver/server.pid) || exit 1
 
 ENTRYPOINT [ "sh", "/entrypoint/docker-entrypoint.sh" ]
 
