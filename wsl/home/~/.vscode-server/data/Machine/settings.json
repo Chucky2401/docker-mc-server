@@ -1,0 +1,39 @@
+{
+    "terminal.integrated.profiles.linux": {
+        "bash": {
+            "path": "bash",
+            "icon": "terminal-bash"
+        },
+        "zsh": {
+            "path": "zsh"
+        },
+        "fish": {
+            "path": "fish"
+        },
+        "tmux": {
+            "path": "tmux",
+            "icon": "terminal-tmux"
+        },
+        "pwsh": {
+            "path": "pwsh",
+            "icon": "terminal-powershell"
+        },
+        "bash-env": {
+            "path": "/bin/ash",
+            "icon": "terminal-bash",
+            "args": [
+                "-c",
+                "if [ -f .env ]; then export $(cat .env); fi; if [ -f .vscode/.env ]; then export $(cat .vscode/.env); fi; ash"
+            ]
+        },
+        "ash": {
+            "path": "/bin/ash"
+        }
+    },
+    "terminal.integrated.defaultProfile.linux": "bash-env",
+    "python.analysis.diagnosticSeverityOverrides": {
+        "reportInvalidStringEscapeSequence": "none",
+        "reportOptionalMemberAccess": "none"
+    },
+    "terminal.integrated.env.linux": {}
+}
