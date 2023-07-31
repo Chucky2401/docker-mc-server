@@ -40,6 +40,8 @@ ENV PATH="${PATH}:/usr/local/bin/mcserver"
 HEALTHCHECK --interval=1m --timeout=5s --start-period=30s --retries=2 \
     CMD ps ax | grep -v grep | grep $(cat /mcserver/server.pid) || exit 1
 
-ENTRYPOINT [ "sh", "/entrypoint/docker-entrypoint.sh" ]
+WORKDIR /entrypoint
+#ENTRYPOINT [ "sh", "/entrypoint/docker-entrypoint.sh" ]
+ENTRYPOINT [ "python3", "download-minecraft.py" ]
 
 CMD [ "--install" ]
