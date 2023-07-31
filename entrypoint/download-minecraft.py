@@ -3,6 +3,7 @@ import urllib.request, json, requests
 import subprocess, re
 import secrets
 import string
+import signal, time
 from tqdm import tqdm
 
 root = os.path.abspath(os.sep)
@@ -230,6 +231,8 @@ def setRcon(password):
     st = os.stat('/usr/local/bin/mcserver/stop-server')
     os.chmod('/usr/local/bin/mcserver/stop-server', st.st_mode | stat.S_IEXEC)
 
+    return 0
+
 # -------------------------------------------------------------------------------------------------------------------- #
 
 ## Function to download mods
@@ -429,19 +432,13 @@ def readSecret(name, default=None, cast_to=str, autocast_name=True, getenv=True,
     
 # -------------------------------------------------------------------------------------------------------------------- #
 
-def listdir_nodefault(path):
-    for f in os.listdir(path):
-        if not f('start-server.py'):
-            yield f
-
-# -------------------------------------------------------------------------------------------------------------------- #
-
 ## Main
 def install():
     result         = -1
     resultFirstRun = -1
     resultEula     = -1
     resultProp     = -1
+    resultRcon     = -1
 
     #alphabet = string.ascii_letters + string.digits + string.punctuation
     alphabet = string.ascii_letters + string.digits
@@ -510,6 +507,23 @@ def install():
 
 # -------------------------------------------------------------------------------------------------------------------- #
 
+class GracefulKiller:
+    kill_now = False
+    process = None
+
+    def __init__(self):
+        signal.signal(signal.SIGINT, self.exit_gracefully)
+        signal.signal(signal.SIGTERM, self.exit_gracefully)
+
+    #def exit_gracefully(self, *args):
+    def exit_gracefully(self, signum, frame):
+        #subprocess.Popen(["stop-server"])
+        self.process.terminate()
+        self.process.communicate()
+        self.kill_now = True
+
+# -------------------------------------------------------------------------------------------------------------------- #
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Install Minecraft Server and optimize it')
     parser.add_argument("--install", '-i', action="store_true", help="Install the server")
@@ -531,24 +545,36 @@ if __name__ == '__main__':
     if os.environ['MC_LOADER'] != "fabric":
         modsResult = 0
         
-        if os.environ['MC_LOADER'] == 'fabric' and installResult == 0:
-            try:
-                os.listdir('/mcserver/mods')
-            except FileNotFoundError:
-                os.mkdir('/mcserver/mods')
-            
-            if len(os.listdir('/mcserver/mods')) == 0:
-                print("")
-                print("Downloading mods for better performance...")
-                modsResult = downloadMods(args.optional_mods)
-
-        if installResult == 0 or modsResult == 0:
-            mainResult = 0
+    if os.environ['MC_LOADER'] == 'fabric' and installResult == 0:
+        try:
+            os.listdir('/mcserver/mods')
+        except FileNotFoundError:
+            os.mkdir('/mcserver/mods')
         
-        if installResult != 0:
-            mainResult = installResult
+        if len(os.listdir('/mcserver/mods')) == 0:
+            print("")
+            print("Downloading mods for better performance...")
+            modsResult = downloadMods(args.optional_mods)
 
-        if modsResult != 0:
-            mainResult = modsResult
+    if installResult == 0 and modsResult == 0:
+        mainResult = 0
+    
+    if installResult != 0:
+        mainResult = installResult
+
+    if modsResult != 0:
+        mainResult = modsResult
+
+    print("")
+    print(" * Server installation status: " + str(mainResult))
+    print("")
+
+    if mainResult == 0:
+        killer = GracefulKiller()
+        startServer = subprocess.Popen(["python3", "/mcserver/start-server.py"], cwd="/mcserver")
+        killer.process = startServer
+
+        while not killer.kill_now:
+            time.sleep(1)
     
     quit(mainResult)
