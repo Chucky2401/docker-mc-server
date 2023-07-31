@@ -1,10 +1,29 @@
 import subprocess, re, tempfile, os, sys
-import time
+import time, signal
 from datetime import datetime
+
+class GracefulKiller:
+    kill_now = False
+    process = None
+
+    def __init__(self):
+        signal.signal(signal.SIGINT, self.exit_gracefully)
+        signal.signal(signal.SIGTERM, self.exit_gracefully)
+
+    #def exit_gracefully(self, *args):
+    def exit_gracefully(self, signum, frame):
+        subprocess.Popen(["stop-server"])
+        self.process.communicate()
+        time.sleep(1)
+        self.kill_now = True
+
+# -------------------------------------------------------------------------------------------------------------------- #
 
 def main():
     matchLastLine = "^\[\d{2}:\d{2}:\d{2}\] \[Server thread/INFO\]: RCON running on \d.\d.\d.\d:\d{,5}"
     serverStarted = False
+
+    killer = GracefulKiller()
 
     maxMem       = "-Xms" + os.environ['MC_MAX_MEM']
     minMem       = "-Xmx" + os.environ['MC_MIN_MEM']
@@ -15,6 +34,7 @@ def main():
     with tempfile.NamedTemporaryFile() as out, tempfile.TemporaryFile() as err:
         out.write(str(f"{datetime.now()}\n").encode("utf-8"))
         mcServerProcess = subprocess.Popen(mcServerArgs, cwd='/mcserver', stdin=subprocess.DEVNULL, stdout=out, stderr=err, preexec_fn=os.setpgrp)
+        killer.process = mcServerProcess
 
         f = open(out.name, 'r')
         while serverStarted == False:
@@ -37,7 +57,17 @@ def main():
     print("")
     print("Have fun!")
 
+    tailLog = subprocess.Popen(["tail", "-n", "1", "-f", "/mcserver/logs/latest.log"], cwd="/mcserver")
+
+    while not killer.kill_now:
+        time.sleep(1)
+
+    tailLog.terminate()
+    print("Server stopped!")
+
+# -------------------------------------------------------------------------------------------------------------------- #
+
 if __name__ == '__main__':
     main()
 
-    quit()
+    sys.exit()
