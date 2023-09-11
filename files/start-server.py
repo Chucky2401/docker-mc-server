@@ -10,7 +10,6 @@ class GracefulKiller:
         signal.signal(signal.SIGINT, self.exit_gracefully)
         signal.signal(signal.SIGTERM, self.exit_gracefully)
 
-    #def exit_gracefully(self, *args):
     def exit_gracefully(self, signum, frame):
         subprocess.Popen(["stop-server"])
         self.process.communicate()
