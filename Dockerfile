@@ -1,8 +1,8 @@
 FROM alpine:latest
 
 LABEL Author="Chucky2401"
-LABEL Description="Minecraft Server"
-LABEL Version="0.1"
+LABEL Description="Minecraft vanilla or fabric Server"
+LABEL Version="1.0"
 
 RUN \
     mkdir /mcserver ; \
@@ -41,7 +41,6 @@ HEALTHCHECK --interval=1m --timeout=5s --start-period=30s --retries=2 \
     CMD ps ax | grep -v grep | grep $(cat /mcserver/server.pid) || exit 1
 
 WORKDIR /entrypoint
-#ENTRYPOINT [ "sh", "/entrypoint/docker-entrypoint.sh" ]
 ENTRYPOINT [ "python3", "download-minecraft.py" ]
 
 CMD [ "--install" ]
