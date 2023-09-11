@@ -116,7 +116,10 @@ def firstRun():
     if result != "":
         return 104
     
-    os.remove("/mcserver/logs/latest.log")
+    try:
+        os.remove("/mcserver/logs/latest.log")
+    except:
+        print("No log file")
 
     return 0
 
@@ -291,6 +294,8 @@ def downloadMods(optional = False):
         
         print("")
 
+    return 0
+
 # -------------------------------------------------------------------------------------------------------------------- #
 
 def modrinthMod(name, id, versionMC):
@@ -386,6 +391,14 @@ def curseforgeMod(name, id, versionMC, token):
 
     if size != 0 and progressBar.n != size:
         print(" ** Failed")
+
+# -------------------------------------------------------------------------------------------------------------------- #
+
+def carpetSettings():
+    confFile = open("/mcserver/world/carpet.conf", "w")
+    confFile.write("fastRedstoneDust true\n")
+    confFile.write("optimizedTNT true\n")
+    confFile.write("lagFreeSpawning true\n")
 
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -517,7 +530,6 @@ class GracefulKiller:
 
     #def exit_gracefully(self, *args):
     def exit_gracefully(self, signum, frame):
-        #subprocess.Popen(["stop-server"])
         self.process.terminate()
         self.process.communicate()
         self.kill_now = True
@@ -535,6 +547,10 @@ if __name__ == '__main__':
     mainResult    = -1
     installResult = -1
     modsResult    = -1
+    isFabric      = False
+
+    if os.environ['MC_LOADER'] == 'fabric':
+        isFabric = True
 
     if args.install:
         if len([f for f in os.listdir("/mcserver") if not f == "start-server.py"]) == 0:
@@ -542,10 +558,10 @@ if __name__ == '__main__':
         else:
             installResult = 0
 
-    if os.environ['MC_LOADER'] != "fabric":
+    if not isFabric:
         modsResult = 0
         
-    if os.environ['MC_LOADER'] == 'fabric' and installResult == 0:
+    if isFabric and installResult == 0:
         try:
             os.listdir('/mcserver/mods')
         except FileNotFoundError:
@@ -573,6 +589,9 @@ if __name__ == '__main__':
         killer = GracefulKiller()
         startServer = subprocess.Popen(["python3", "/mcserver/start-server.py"], cwd="/mcserver")
         killer.process = startServer
+
+        if isFabric:
+            carpetSettings()
 
         while not killer.kill_now:
             time.sleep(1)
