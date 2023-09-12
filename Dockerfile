@@ -9,7 +9,6 @@ RUN \
     mkdir -m 755 /usr/local/bin/mcserver ; \
     mkdir /entrypoint
 
-COPY --chmod=755 entrypoint/docker-entrypoint.sh /entrypoint/docker-entrypoint.sh
 COPY --chmod=755 entrypoint/download-minecraft.py /entrypoint/download-minecraft.py
 COPY --chmod=444 entrypoint/mods.json /entrypoint/mods.json
 COPY --chmod=755 files/start-server.py /mcserver/start-server.py
