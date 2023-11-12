@@ -11,7 +11,7 @@ RUN \
 
 COPY --chmod=755 entrypoint/download-minecraft.py /entrypoint/download-minecraft.py
 COPY --chmod=444 entrypoint/mods.json /entrypoint/mods.json
-COPY --chmod=755 files/start-server.py /mcserver/start-server.py
+COPY --chmod=755 files/start-server.py /entrypoint/start-server.py
 
 RUN \
     echo "*** Update APK ***" ; \
@@ -29,6 +29,7 @@ RUN \
 
 EXPOSE 25565 25575
 VOLUME /mcserver
+VOLUME /usr/local/bin/mcserver
 
 ENV MC_LOADER=vanilla
 ENV MC_VERSION=latest
