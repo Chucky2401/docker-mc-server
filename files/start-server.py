@@ -24,8 +24,8 @@ def main():
 
     killer = GracefulKiller()
 
-    maxMem       = "-Xms" + os.environ['MC_MAX_MEM']
-    minMem       = "-Xmx" + os.environ['MC_MIN_MEM']
+    maxMem       = "-Xmx" + os.environ['MC_MAX_MEM']
+    minMem       = "-Xms" + os.environ['MC_MIN_MEM']
     mcServerArgs = ["nohup", "java", minMem, maxMem, "--add-modules=jdk.incubator.vector", "-XX:+UseG1GC", "-XX:+ParallelRefProcEnabled", "-XX:MaxGCPauseMillis=200", "-XX:+UnlockExperimentalVMOptions", "-XX:+DisableExplicitGC", "-XX:+AlwaysPreTouch", "-XX:G1HeapWastePercent=5", "-XX:G1MixedGCCountTarget=4", "-XX:InitiatingHeapOccupancyPercent=15", "-XX:G1MixedGCLiveThresholdPercent=90", "-XX:G1RSetUpdatingPauseTimePercent=5", "-XX:SurvivorRatio=32", "-XX:+PerfDisableSharedMem", "-XX:MaxTenuringThreshold=1", "-Dusing.aikars.flags=https://mcflags.emc.gs", "-Daikars.new.flags=true", "-XX:G1NewSizePercent=30", "-XX:G1MaxNewSizePercent=40", "-XX:G1HeapRegionSize=8M", "-XX:G1ReservePercent=20", "-jar", "/mcserver/server.jar", "--nogui"]
 
     print("Starting Minecraft Server...")
@@ -40,10 +40,11 @@ def main():
             for line in f.readlines():
                 print(line, end='')
                 if re.match(matchLastLine, line):
+                    time.sleep(1)
                     print(" * Server started (" + str(mcServerProcess.pid) + ")!")
                     serverStarted = True
                     break
-            time.sleep(0.5)
+            time.sleep(1)
 
     latestLog = open("/mcserver/logs/latest.log", "a")
     latestLog.write("\n")
