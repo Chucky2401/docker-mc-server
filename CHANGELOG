@@ -1,0 +1,27 @@
+# Changelog
+
+## v1.0.1 - 11/12/2023
+
+Big fix as the server won't start
+
+### Fix
+
+- (Dockerfile): copy `start-server.py` to `/entrypoint` to avoid removing when using `-v|--volume` parameter with Docker
+- (Dockerfile): add `/usr/local/bin/mcserver` as volume to not lose rcon script after remove
+- (download-minecraft): copy `start-server.py` from `/entrypoint` to `/mcserver` folder
+- (download-minecraft): wait for `/mcserver/world` to exist before editing `/mcserver/world/carpet.conf`
+- (start-server): Java parameter `-Xms` and `-Xms` inverted that throw an error
+- (mods): disable **Memory Leak Fix** otherwise the server crash
+
+### Commit
+
+- *b8ca948*: fix: move start-server.py and add /usr/local/bin/mcserver as volume
+- *d3e2327*: fix: add start-server.py copy and waited for /mcserver/world exist before editing carpet.conf
+- *5c6566f*: fix: Java memory parameter inverted
+- *a6359e9*: fix: disable Memory Leak Fix mods otherwise server crash
+
+---
+
+## v1.0.0 - 09/11/2023
+
+Creation of this docker image
