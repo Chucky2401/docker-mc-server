@@ -4,6 +4,7 @@ import subprocess, re
 import secrets
 import string
 import signal, time
+import shutil
 from tqdm import tqdm
 
 root = os.path.abspath(os.sep)
@@ -395,7 +396,7 @@ def curseforgeMod(name, id, versionMC, token):
 # -------------------------------------------------------------------------------------------------------------------- #
 
 def carpetSettings():
-    confFile = open("/mcserver/world/carpet.conf", "w")
+    confFile = open("/mcserver/world/carpet.conf", "w+")
     confFile.write("fastRedstoneDust true\n")
     confFile.write("optimizedTNT true\n")
     confFile.write("lagFreeSpawning true\n")
@@ -548,6 +549,8 @@ if __name__ == '__main__':
     installResult = -1
     modsResult    = -1
     isFabric      = False
+    
+    shutil.copyfile("/entrypoint/start-server.py", "/mcserver/start-server.py")
 
     if os.environ['MC_LOADER'] == 'fabric':
         isFabric = True
@@ -571,6 +574,8 @@ if __name__ == '__main__':
             print("")
             print("Downloading mods for better performance...")
             modsResult = downloadMods(args.optional_mods)
+        else:
+            modsResult = 0
 
     if installResult == 0 and modsResult == 0:
         mainResult = 0
@@ -589,6 +594,9 @@ if __name__ == '__main__':
         killer = GracefulKiller()
         startServer = subprocess.Popen(["python3", "/mcserver/start-server.py"], cwd="/mcserver")
         killer.process = startServer
+
+        while not os.path.exists("/mcserver/world"):
+            time.sleep(1)
 
         if isFabric:
             carpetSettings()
