@@ -40,7 +40,7 @@
             "name": "Memory Leak Fix",
             "id": "NRjRiSSD",
             "source": "modrinth",
-            "enable": true
+            "enable": false
         },
         {
             "name": "Server Performance - Smooth Chunk Save",
